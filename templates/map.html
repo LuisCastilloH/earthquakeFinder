@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Earthquake Monitor</title>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/styles.css') }}">
+
+    <script type="text/javascript">
+    // Each marker is labeled with a single alphabetical character.
+    var labels = 0;
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: {{lat}}, lng: {{lng}}},
+            zoom: 10
+        });
+
+        var points = {{ earthquakes|tojson }};
+        //points = JSON.parse(points);
+        var marker;
+        for (var i = 0; i < points.length; i++) {
+            labels++;
+            marker = new google.maps.Marker({                                
+              position: new google.maps.LatLng(points[i]['lat'], points[i]['lng']),
+              map: map,
+              label: labels.toString()
+            });   
+        } 
+    }
+    function decodeJSON(encodedJSON) {
+        var decodedJSON = $('<div/>').html(encodedJSON).text();
+        return $.parseJSON(decodedJSON);
+    }
+    </script>
+</head>
+<body class="#f1f8e9 light-green lighten-5" onload="initMap()">
+    <div class="row"> 
+        <div class="col s12 m8">
+            <h1 id="efinder">Earthquake finder</h1>
+            <p id="loc">Location</p>
+            <form action="." method="POST">
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="text" name="text">
+                </div>
+                <div class="input-field col s6">
+                    <input class="btn waves-effect waves-light" type="submit" name="my-form" value="Send">
+                </div>
+            </div>
+            </form>
+            <div class="container">
+                <div id="map" style="width:100%; height:500px;"></div>
+            </div>
+            <div>
+                <h2>{{ location }}</h2>
+                <div class="row">
+                    <p class="col s6 m1">Index</p>
+                    <p class="col s6 m3">Datetime</p>
+                    <p class="col s6 m2">Magnitude</p>
+                    <p class="col s6 m2">Depth</p>
+                    <p class="col s6 m2">Lat</p>
+                    <p class="col s6 m2">Lng</p>
+                </div>
+                {% if earthquakes|length > 0 %}
+                {% for i in earthquakes %}
+                <ul>
+                <div class="row">    
+                    <li class="col s6 m1">{{ i['index'] }}</li>
+                    <li class="col s6 m3">{{ i['datetime'] }}</li>
+                    <li class="col s6 m2">{{ i['magnitude'] }}</li>
+                    <li class="col s6 m2">{{ i['depth'] }}</li>
+                    <li class="col s6 m2">{{ i['lat'] }}</li>
+                    <li class="col s6 m2">{{ i['lng'] }}</li>
+                </div>
+                </ul>
+                {% endfor %}
+                {% else %}
+                <h3 id="eregist">No earthquakes registered</h3>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col s4">
+            <h2>Top 10: Largest earthquakes in 12 months</h2>
+            <div class="row">
+                <p class="col s12 m3">Magnitude</p>
+                <p class="col s12 m5">Datetime</p>
+                <p class="col s12 m4">Location</p>
+                {% for i in topEarthquakes %}
+                <ul>
+                    <div class="row">
+                    <li class="col s12 m3">{{ i['magnitude'] }}</li>
+                    <li class="col s12 m5">{{ i['datetime'] }}</li>
+                    <li class="col s12 m4">{{ i['name'] }}</li>
+                    </div>
+                </ul>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
